@@ -1,3 +1,1 @@
-"use strict";
-
-module.exports = require("./lib/wrapper");
+module.exports = require('./lib/quadprog');
