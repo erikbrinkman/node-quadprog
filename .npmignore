@@ -1,3 +1,9 @@
-.git*
-test/
+/test
+/.git
+/.eslintrc.json
+/.vscode
+/.travis.yml
 
+.gitignore
+.*.un~
+.*.swp
