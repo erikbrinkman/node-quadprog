@@ -1,17 +1,17 @@
 "use strict";
-
 const fs = require("fs");
 
 const test = require("tape");
 
-const qp = require("../lib/quadprog");
 const epsilon = require("../lib/vsmall");
+const wrap = require("./wrapper");
+const solve = require("..");
 
 function almostEqual(a, b) {
     const isAlmostEqual = Math.abs(a - b) <= epsilon + 1e-10 * Math.abs(b);
 
     if (!isAlmostEqual) {
-        console.log(a, b); // eslint-disable-line no-console
+        console.error(a, b); // eslint-disable-line no-console
     }
 
     return isAlmostEqual;
@@ -23,53 +23,32 @@ function almostEqualArray(a, b) {
 
 function testWrapper(base) {
     const {
-        Dmat,
-        dvec,
-        Amat,
-        bvec,
-        meq,
-        factorized
-    } = JSON.parse(fs.readFileSync(`test/${base}-data.json`).toString());
-    const expected = JSON.parse(fs.readFileSync(`test/${base}-result.json`).toString());
+        Dmat, dvec, Amat, bvec, meq, factorized
+    } = wrap(JSON.parse(fs.readFileSync(`test/${base}-data.json`, "utf8")));
+    const expected = JSON.parse(fs.readFileSync(`test/${base}-result.json`));
 
-    [Dmat, Amat].forEach(m => m.forEach(r => r.unshift(0)));
-    [Dmat, dvec, Amat, bvec].forEach(v => v.unshift(0));
     if (expected.Lagrangian.length === undefined) { // eslint-disable-line no-undefined
         expected.Lagrangian = [expected.Lagrangian];
     }
     if (expected.iact.length === undefined) { // eslint-disable-line no-undefined
         expected.iact = [expected.iact];
     }
+    expected.iact.forEach((v, i) => {
+        expected.iact[i] = v - 1;
+    });
 
     function wrappedTest(t) {
         const {
-            message,
-            value,
-            solution,
-            unconstrained_solution, // eslint-disable-line camelcase
-            Lagrangian,
-            iact,
-            iterations
-        } = qp.solveQP(Dmat, dvec, Amat, bvec, meq, [, factorized ? 1 : 0]); // eslint-disable-line no-sparse-arrays
+            value, solution, unconstrained, lagrangian, active, iterations, inactive
+        } = solve(Dmat, dvec, Amat, bvec, meq, factorized);
 
-        [solution, unconstrained_solution, Lagrangian, iact, iterations].forEach(v => v.shift()); // eslint-disable-line camelcase
-
-        t.equal(message, "",
-            "message is empty");
-        t.ok(almostEqual(value[1], expected.value),
-            "values are almost equal");
-        t.ok(almostEqualArray(solution, expected.solution),
-            "solutions are almost equal");
-        t.ok(almostEqualArray(unconstrained_solution, expected["unconstrained.solution"]),
-            "unconstrained solutions are almost equal");
-        t.ok(almostEqualArray(Lagrangian, expected.Lagrangian),
-            "lagrangians are almost equal");
-        t.deepEqual(iact.slice(0, expected.iact.length), expected.iact,
-            "iact values are equal");
-        t.deepEqual(iact.slice(expected.iact.length), new Array(iact.length - expected.iact.length).fill(0),
-            "the rest of iact values are equal");
-        t.deepEqual(iterations, expected.iterations,
-            "iterations are equal");
+        t.ok(almostEqual(value, expected.value), "values are almost equal");
+        t.ok(almostEqualArray(solution, expected.solution), "solutions are almost equal");
+        t.ok(almostEqualArray(unconstrained, expected["unconstrained.solution"]), "unconstrained solutions are almost equal");
+        t.ok(almostEqualArray(lagrangian, expected.Lagrangian), "lagrangians are almost equal");
+        t.deepEqual(active, expected.iact, "iact values are equal");
+        t.equal(iterations, expected.iterations[0], "iterations are equal");
+        t.equal(inactive, expected.iterations[1], "inactive switches are equal");
         t.end();
     }
     return wrappedTest;

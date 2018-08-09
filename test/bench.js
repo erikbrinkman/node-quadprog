@@ -1,35 +1,21 @@
 "use strict";
-
 const fs = require("fs");
 
 const Benchmark = require("benchmark");
 
-const solve = require("../lib/quadprog").solveQP;
+const wrap = require("./wrapper");
+const solve = require("..");
 
 const suite = new Benchmark.Suite("quadprog");
 
 function wsolve(file) {
     const {
-        Dmat,
-        dvec,
-        Amat,
-        bvec,
-        meq,
-        factorized
-    } = JSON.parse(fs.readFileSync(file).toString());
-
-    [Dmat, Amat].forEach(m => m.forEach(r => r.unshift(0)));
-    [Dmat, dvec, Amat, bvec].forEach(v => v.unshift([]));
+        Dmat, dvec, Amat, bvec, meq, factorized
+    } = wrap(JSON.parse(fs.readFileSync(file, "utf8")));
 
     function wrapped() {
-        solve(
-            Dmat.map(r => r.slice()),
-            dvec.slice(),
-            Amat.map(r => r.slice()),
-            bvec.slice(),
-            meq,
-            [, factorized ? 1 : 0] // eslint-disable-line no-sparse-arrays
-        );
+        solve(Dmat.map(r => r.slice()), dvec.slice(), Amat.map(r => r.slice()),
+            bvec.slice(), meq, factorized);
     }
     return wrapped;
 }
@@ -39,7 +25,5 @@ fs.readdirSync("test")
     .forEach(f => suite.add(f.slice(0, -10), wsolve(`test/${f}`)));
 
 suite
-    .on("cycle", event => {
-        console.warn(String(event.target));
-    })
+    .on("cycle", event => console.warn(String(event.target))) // eslint-disable-line no-console
     .run();
