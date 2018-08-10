@@ -1,9 +1,3 @@
-/test
-/.git
-/.eslintrc.json
-/.vscode
-/.travis.yml
+.git*
+test/
 
-.gitignore
-.*.un~
-.*.swp
