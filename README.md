@@ -3,6 +3,7 @@ Deno Quadprog
 
 This module contains routines for solving quadratic programming problems, written in JavaScript.
 It is a strict fork of [this library](https://github.com/albertosantini/node-quadprog) that's been wrapped to support ES6 modules and deno.
+The goal is to have the wrapping be as mminimal as possible, so that version can be reabsed on top of the original.
 
 Example
 ========
@@ -17,7 +18,7 @@ min xT Q x + cT x
 Then the following example solves it
 
 ```
-import qp from "deno.land/x/quadprog/mod.ts";
+import solve from "deno.land/x/quadprog/mod.ts";
 
 const Q = [[1, 0, 0],
            [0, 1, 0],
@@ -28,20 +29,5 @@ const A = [[-4, -3, 0],
            [ 0, -2, 1]];
 const b = [-8, 2, 0];
 
-res = qp(Q, c, A, b)
+res = solve(Q, c, A, b)
 ```
-
-
-Testing
-=======
-
-Base test cases are in json formatted files with the name `<name>-data.json`.
-These can be passed into `solve.R` to create the standard R results for solveQP with the name `<name>-result.json`.
-The standard usage is `Rscript solve.R *-data.json`, but you may wish to only create result files for specific tests.
-The combination of these files is then used by `solution-test.js` and `bench.js`.
-
-
-Adding Tests
-------------
-
-To add a new test simply create a file called `<name>-data.json` in the test directory, and then call `Rscript solve.R <name>-data.json` and commit the results.
