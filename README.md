@@ -1,6 +1,8 @@
 Deno Quadprog
 ===========
 
+![tests](https://github.com/erikbrinkman/node-quadprog/workflows/tests/badge.svg)
+
 This module contains routines for solving quadratic programming problems, written in JavaScript.
 It is a strict fork of [this library](https://github.com/albertosantini/node-quadprog) that's been wrapped to support ES6 modules and deno.
 The goal is to have the wrapping be as mminimal as possible, so that version can be reabsed on top of the original.
