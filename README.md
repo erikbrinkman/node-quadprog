@@ -17,19 +17,29 @@ min xT Q x + cT x
  st A x <= b
 ```
 
-Then the following example solves it
+Then the following example solves it:
 
 ```
-import solve from "deno.land/x/quadprog/mod.ts";
+import solve from "https://deno.land/x/quadprog@v1.0.2/mod.ts";
 
-const Q = [[1, 0, 0],
-           [0, 1, 0],
-           [0, 0, 1]];
+const Q = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
 const c = [0, -5, 0];
-const A = [[-4, -3, 0],
-           [ 2,  1, 0],
-           [ 0, -2, 1]];
+const A = [[-4, -3, 0], [2, 1, 0], [0, -2, 1]];
 const b = [-8, 2, 0];
 
-res = solve(Q, c, A, b)
+console.log(solve(Q, c, A, b));
+```
+
+and produces output:
+
+```
+{
+  solution: [ -1.2, 4.4, 0 ],
+  lagrangian: [ 0, 0.6, 0 ],
+  unconstrained: [ 0, 5, -0 ],
+  iterations: 2,
+  inactive: 0,
+  active: [ 1 ],
+  value: -11.6
+}
 ```
