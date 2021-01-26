@@ -1,6 +1,8 @@
 Deno Quadprog
 ===========
 
+Deprecated due to [skypack](https://www.skypack.dev/view/quadprog).
+
 ![tests](https://github.com/erikbrinkman/node-quadprog/workflows/tests/badge.svg)
 
 This module contains routines for solving quadratic programming problems, written in JavaScript.
